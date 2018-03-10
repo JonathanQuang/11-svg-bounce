@@ -1,43 +1,66 @@
 console.log("loaded");
 svg = document.getElementById("svgElement");
 
+intervalStarted = false;
+intervalReference = null;
+
 idCounter = 0;
+circleArray = [];
 
 var createCircle = function(event){
 
-	xPos = event.offsetX;
-	yPos = event.offsetY;
+	circleObj = {
+		"xPos":event.offsetX,
+		"yPos":event.offsetY,
+		"xVel":((Math.random()*5)-10)*2,
+		"yVel":((Math.random()*5)-10)*2
+	}
 
 	theCircle = document.createElementNS("http://www.w3.org/2000/svg","circle");
-	theCircle.setAttribute("cx",event.offsetX);
-	theCircle.setAttribute("cy",event.offsetY);
-	theCircle.setAttribute("r",25);
-	theCircle.setAttribute("id",idCounter);
+	circleObj["htmlReference"]=theCircle;
+	circleObj.htmlReference.setAttribute("cx",circleObj.xPos);
+	circleObj.htmlReference.setAttribute("cy",circleObj.yPos);
+	circleObj.htmlReference.setAttribute("r",25);
+	circleObj.htmlReference.setAttribute("id",idCounter);
 	idCounter+=1;
 	
+
+	circleArray.push(circleObj);
 	svg.append(theCircle);
 
-	xVel = Math.random()*5-10;
-	yVel = Math.random()*5-10;
-
 	var runAnimation = function() {
-		xPos += xVel;
-		yPos += yVel;
+		
+			for (let circ of circleArray){
+		
+			circ.xPos += circ.xVel;
+			circ.yPos += circ.yVel;
 
-		theCircle.setAttribute("cx",xPos);
-		theCircle.setAttribute("cy",yPos);
+			circ.htmlReference.setAttribute("cx",circ.xPos);
+			circ.htmlReference.setAttribute("cy",circ.yPos);
 
-		if (xPos <= 25 || xPos >= 475){
-			xVel *= -1;
-		}	
+			if (circ.xPos <= 25 || circ.xPos >= 475){
+				circ.xVel *= -1;
+			}	
 
-		if (yPos <= 25 || yPos >= 475){
-			yVel *= -1;
+			if (circ.yPos <= 25 || circ.yPos >= 475){
+				circ.yVel *= -1;
+			}
 		}
 	}
 	
-	currentInterval = setInterval(runAnimation,50);	
+	if (!intervalStarted){
+		intervalReference = setInterval(runAnimation,50);
+		intervalStarted = true;
+	}
 }
 
 
+var clearSvg = function(){
+	clearInterval(intervalReference);
+	while (svg.firstChild){
+		svg.removeChild(svg.firstChild);
+	}
+}
+
+document.getElementById("clear").addEventListener("click",clearSvg);
 svg.addEventListener("click",createCircle);
